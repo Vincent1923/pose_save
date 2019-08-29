@@ -34,8 +34,6 @@ endif()
  )
 
 catkin_package(
-  INCLUDE_DIRS
-      include
   LIBRARIES pose_save
   CATKIN_DEPENDS
       roscpp
@@ -49,10 +47,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
- include
   ${OpenCV_INCLUDE_DIRS}
   ${BULLET_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+  "/usr/include/eigen3"
 )
 
 add_executable(${PROJECT_NAME}_node src/pose_save.cpp)
@@ -62,3 +60,11 @@ target_link_libraries(${PROJECT_NAME}_node ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARI
 add_executable(invert_pose_node src/invertpose.cpp)
 add_dependencies(invert_pose_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(invert_pose_node ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable(use_geometry src/use_geometry.cpp)
+add_dependencies(use_geometry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(use_geometry ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable(pose_cal src/pose_cal.cpp)
+add_dependencies(pose_cal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pose_cal ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})

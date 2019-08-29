@@ -24,19 +24,13 @@ int main(int argc, char** argv)
  */
 
   // 地图"/robot1/map"中机器人的位姿
-  geometry_msgs::PoseWithCovarianceStamped pose;
-  pose.header.frame_id = "map";
-//  pose.header.stamp = ros::Time::now();
-  pose.pose.pose.position.x = -0.214872;
-  pose.pose.pose.position.y = 1.33488;
-  pose.pose.pose.position.z = 0.0;
-  pose.pose.pose.orientation.x = 0.0;
-  pose.pose.pose.orientation.y = 0.0;
-  pose.pose.pose.orientation.z = 0.894145;
-  pose.pose.pose.orientation.w = 0.447777;
-  pose.pose.covariance[6 * 0 + 0] = 0.5 * 0.5;
-  pose.pose.covariance[6 * 1 + 1] = 0.5 * 0.5;
-  pose.pose.covariance[6 * 5 + 5] = M_PI / 12.0 * M_PI / 12.0;
+  double position_x = -0.214872;
+  double position_y = 1.33488;
+  double position_z = 0.0;
+  double orientation_x = 0.0;
+  double orientation_y = 0.0;
+  double orientation_z = 0.894145;
+  double orientation_w = 0.447777;
 
   // 地图"/robot1/map"到地图"/robot2/map"的平移向量和旋转向量（旋转向量用四元数表示）
   double translation_x = -0.33;  // 平移矩阵(translation_x, translation_y, translation_z)
@@ -48,7 +42,7 @@ int main(int argc, char** argv)
   double quaternion_w = 0.70;
 
   tf::Transform transform = tf::Transform(tf::Quaternion(quaternion_x, quaternion_y, quaternion_z, quaternion_w),
-                                              tf::Vector3(translation_x, translation_y, translation_z));
+                                          tf::Vector3(translation_x, translation_y, translation_z));
 
 /*
  * 计算地图坐标系间的变换矩阵
@@ -89,8 +83,8 @@ int main(int argc, char** argv)
 
   // 计算机器人在"/robot1/map"中的朝向角度
   double roll, pitch, yaw;  // 机器人在"/robot1/map"中的朝向角度
-  tf::Quaternion quaternion_pose(pose.pose.pose.orientation.x, pose.pose.pose.orientation.y,
-                                 pose.pose.pose.orientation.z, pose.pose.pose.orientation.w);
+  tf::Quaternion quaternion_pose(orientation_x, orientation_y,
+                                 orientation_z, orientation_w);
   tf::Matrix3x3 matrix_pose(quaternion_pose);
   matrix_pose.getRPY(roll, pitch, yaw);
 
@@ -107,11 +101,11 @@ int main(int argc, char** argv)
   geometry_msgs::PoseWithCovarianceStamped pose_warped;  // 机器人在"/robot2/map"中的位姿
   pose_warped.header.frame_id = "map";
 //  pose_warped.header.stamp = ros::Time::now();
-  pose_warped.pose.pose.position.x = pose.pose.pose.position.x * transform_matrix.at<double>(0, 0)
-                                     + pose.pose.pose.position.y * transform_matrix.at<double>(0, 1)
+  pose_warped.pose.pose.position.x = position_x * transform_matrix.at<double>(0, 0)
+                                     + position_y * transform_matrix.at<double>(0, 1)
                                      + transform_matrix.at<double>(0, 2);
-  pose_warped.pose.pose.position.y = pose.pose.pose.position.x * transform_matrix.at<double>(1, 0)
-                                     + pose.pose.pose.position.y * transform_matrix.at<double>(1, 1)
+  pose_warped.pose.pose.position.y = position_x * transform_matrix.at<double>(1, 0)
+                                     + position_y * transform_matrix.at<double>(1, 1)
                                      + transform_matrix.at<double>(1, 2);
   pose_warped.pose.pose.position.z = 0.0;
   pose_warped.pose.pose.orientation.x = quaternion_warped.x();
@@ -148,6 +142,39 @@ int main(int argc, char** argv)
  *         pitch	Angle around Y
  *         roll	  Angle around X
  */
+
+  tf::Quaternion q_wormhole(orientation_x, orientation_y, orientation_z, orientation_w);
+  tf::Vector3 v_wormhole(position_x, position_y, position_z);
+  tf::Transform wormhole_before_transform = tf::Transform(q_wormhole, v_wormhole);
+
+  tf::Quaternion q(quaternion_x, quaternion_y, quaternion_z, quaternion_w);
+  tf::Vector3 vector( translation_x, translation_y, translation_z);
+  tf::Transform T = tf::Transform(q, vector);
+  tf::Transform T_inverse = T.inverse();
+
+  tf::Matrix3x3 rotation_matrix = T.getBasis();
+  std::cout << "rotation matrix =" << std::endl;
+  for (int i = 0; i < 3; i++)
+  {
+    std::cout << rotation_matrix.getRow(i).getX() << " ";
+    std::cout << rotation_matrix.getRow(i).getY() << " ";
+    std::cout << rotation_matrix.getRow(i).getZ() << std::endl;
+  }
+  tf::Quaternion Q;
+  rotation_matrix.getRotation(Q);
+  std::cout << "quaternion =" << std::endl;
+  std::cout << Q.x() << " " << Q.y() << " " << Q.z() << " " << Q.w() << std::endl;
+
+  tf::Transform wormhole = T_inverse.operator*(wormhole_before_transform);
+
+  ROS_ERROR("Publishing the wormhole_after_transform!");
+  std::cout << "wormhole.getOrigin().x(): " << wormhole.getOrigin().x() << std::endl;
+  std::cout << "wormhole.getOrigin().y(): " << wormhole.getOrigin().y() << std::endl;
+  std::cout << "wormhole.getOrigin().z(): " << wormhole.getOrigin().z() << std::endl;
+  std::cout << "wormhole.getRotation().x(): " << wormhole.getRotation().x() << std::endl;
+  std::cout << "wormhole.getRotation().y(): " << wormhole.getRotation().y() << std::endl;
+  std::cout << "wormhole.getRotation().z(): " << wormhole.getRotation().z() << std::endl;
+  std::cout << "wormhole.getRotation().w(): " << wormhole.getRotation().w() << std::endl;
 
   return 0;
 }
