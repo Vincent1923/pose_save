@@ -29,8 +29,8 @@ int main(int argc, char** argv)
   double position_z = 0.0;
   double orientation_x = 0.0;
   double orientation_y = 0.0;
-  double orientation_z = 0.894145;
-  double orientation_w = 0.447777;
+  double orientation_z = 0.707;
+  double orientation_w = 0.707;
 
   // 地图"/robot1/map"到地图"/robot2/map"的平移向量和旋转向量（旋转向量用四元数表示）
   double translation_x = -0.33;  // 平移矩阵(translation_x, translation_y, translation_z)
@@ -38,8 +38,8 @@ int main(int argc, char** argv)
   double translation_z = 0.0;
   double quaternion_x = 0.0;     // 四元数(quaternion_x, quaternion_y, quaternion_z, quaternion_w)
   double quaternion_y = 0.0;
-  double quaternion_z = 0.71;
-  double quaternion_w = 0.70;
+  double quaternion_z = 0.707;
+  double quaternion_w = 0.707;
 
   tf::Transform transform = tf::Transform(tf::Quaternion(quaternion_x, quaternion_y, quaternion_z, quaternion_w),
                                           tf::Vector3(translation_x, translation_y, translation_z));
@@ -175,6 +175,26 @@ int main(int argc, char** argv)
   std::cout << "wormhole.getRotation().y(): " << wormhole.getRotation().y() << std::endl;
   std::cout << "wormhole.getRotation().z(): " << wormhole.getRotation().z() << std::endl;
   std::cout << "wormhole.getRotation().w(): " << wormhole.getRotation().w() << std::endl;
+
+
+  tf::Quaternion quaternion_test(0, 0, -0.999, 0.037);
+  tf::Matrix3x3 matrix_test(quaternion_test);
+  double roll_transform_test;
+  double pitch_transform_test;
+  double yaw_transform_test;
+  matrix_test.getEulerYPR(yaw_transform_test, pitch_transform_test, roll_transform_test);
+  std::cout << "yaw_transform_test: " << yaw_transform_test << std::endl;
+  std::cout << "pitch_transform_test: " << pitch_transform_test << std::endl;
+  std::cout << "roll_transform_test: " << roll_transform_test << std::endl;
+
+  tf::Matrix3x3 rotation_matrix_test;
+  rotation_matrix_test.setEulerYPR( 3.06755 * -1.0, 0., 0. );
+  tf::Quaternion quat;
+  rotation_matrix_test.getRotation( quat );
+  std::cout << "quat.getX(): " << quat.getX() << std::endl;
+  std::cout << "quat.getY(): " << quat.getY() << std::endl;
+  std::cout << "quat.getZ(): " << quat.getZ() << std::endl;
+  std::cout << "quat.getW(): " << quat.getW() << std::endl;
 
   return 0;
 }

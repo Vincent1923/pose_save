@@ -68,3 +68,11 @@ target_link_libraries(use_geometry ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${ca
 add_executable(pose_cal src/pose_cal.cpp)
 add_dependencies(pose_cal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pose_cal ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable(euler_quaternion src/euler_quaternion.cpp)
+add_dependencies(euler_quaternion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(euler_quaternion ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
+
+add_executable(multi_map_pose_cal src/multi_map_pose_cal.cpp)
+add_dependencies(multi_map_pose_cal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(multi_map_pose_cal ${OpenCV_LIBRARIES} ${YAMLCPP_LIBRARIES} ${catkin_LIBRARIES})
