@@ -30,14 +30,14 @@ void InitMapTransform()
 {
   struct EndPose end_pose_tmp;
 
-  end_pose_tmp.translation_x = 0;  // map_1 的结束点位姿
-  end_pose_tmp.translation_y = 0;
-  end_pose_tmp.yaw = 0;
+  end_pose_tmp.translation_x = -0.891;  // map_1 的结束点位姿
+  end_pose_tmp.translation_y = 2.071;
+  end_pose_tmp.yaw = 1.5773;
   end_poses.push_back(end_pose_tmp);
 
-  end_pose_tmp.translation_x = 0;  // map_2 的结束点位姿
-  end_pose_tmp.translation_y = 0;
-  end_pose_tmp.yaw = 0;
+  end_pose_tmp.translation_x = 3.49;  // map_2 的结束点位姿
+  end_pose_tmp.translation_y = 4.02;
+  end_pose_tmp.yaw = 3.11759;
   end_poses.push_back(end_pose_tmp);
 
   MapTransform map_tf;
@@ -68,10 +68,12 @@ void InitMapTransform()
     tf_end_pose.pretranslate(Eigen::Vector3d(it->translation_x, it->translation_y, 0.0));  // 平移向量
     cout << "Transform matrix = \n" << tf_end_pose.matrix() << endl << endl;
 
-    map_tf.map_name = i;
+    map_tf.map_name = i + 1;
     map_tf.transform = transform_maps.back().transform.operator * (tf_end_pose);
 
     transform_maps.push_back(map_tf);
+
+    it++;
   }
 }
 
@@ -81,6 +83,18 @@ int main(int argc, char **argv)
 
   InitMapTransform();
 
+  // 打印地图 map_1 到地图 map_N 的变换关系
+  for (std::vector<struct MapTransform>::iterator it = transform_maps.begin();
+       it != transform_maps.end(); it++)
+  {
+    ROS_WARN("map %d", it->map_name);
+    Eigen::Vector3d translation = it->transform.translation();
+    cout << "translation = \n" << translation << endl;
+    Eigen::Quaterniond quaternion = Eigen::Quaterniond(it->transform.rotation());
+    cout << "quaternion = \n" << quaternion.coeffs() << endl << endl;
+  }
+
+  // 根据 current_map 和 target_map 的 id，计算两张地图的变换矩阵
   int current_map = 1;
   int target_map = 2;
   Eigen::Isometry3d transform = Eigen::Isometry3d::Identity();
@@ -105,24 +119,30 @@ int main(int argc, char **argv)
   {
     // 从 map_1 切换到 map_N
     transform = target_map_it->transform.inverse();
-    std::cout << "First case!" << std::endl;
+    ROS_WARN("First case!");
   }
   else if (target_map == 1)
   {
     // 从 map_N 切换到 map_1
     transform = current_map_it->transform;
-    std::cout << "Second case!" << std::endl;
+    ROS_WARN("Second case!");
   }
   else
   {
     transform = target_map_it->transform.inverse().operator * (
                     current_map_it->transform);
-    std::cout << "Third case!" << std::endl;
+    ROS_WARN("Third case!");
   }
 
+  // 打印变换矩阵 transform
+  Eigen::Vector3d transform_translation = transform.translation();
+  cout << "transform translation = \n" << transform_translation << endl;
+  Eigen::Quaterniond transform_quaternion = Eigen::Quaterniond(transform.rotation());
+  cout << "transform quaternion = \n" << transform_quaternion.coeffs() << endl << endl;
+
   // 地图"current_map"中机器人的位姿
-  double position_x = -6.4324;  // 位置 (position_x, position_y, position_z)
-  double position_y = 4.3184;
+  double position_x = -0.04;  // 位置 (position_x, position_y, position_z)
+  double position_y = 2.43;
   double position_z = 0.0;
   double position_yaw = 3.0;   // 朝向
 
@@ -136,7 +156,7 @@ int main(int argc, char **argv)
   // 机器人朝向和旋转向量分别以四元数来表示
   Eigen::Quaterniond quaternion_pose;
   quaternion_pose = yaw_angle_pose * pitch_angle_pose * roll_angle_pose;
-  cout << "quaternion_pos = \n" << quaternion_pose.coeffs() << endl << endl << endl;  // 注意 coeffs的顺序是 (x, y, z, w)，w 为实部，前三者为虚部
+  cout << "pose quaternion = \n" << quaternion_pose.coeffs() << endl << endl << endl;  // 注意 coeffs的顺序是 (x, y, z, w)，w 为实部，前三者为虚部
 
   Eigen::Isometry3d pose = Eigen::Isometry3d::Identity();
   pose.rotate(quaternion_pose);

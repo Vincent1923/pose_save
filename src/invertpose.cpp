@@ -24,22 +24,22 @@ int main(int argc, char** argv)
  */
 
   // 地图"/robot1/map"中机器人的位姿
-  double position_x = -0.214872;
-  double position_y = 1.33488;
+  double position_x = -6.4324;
+  double position_y = 4.3184;
   double position_z = 0.0;
   double orientation_x = 0.0;
   double orientation_y = 0.0;
-  double orientation_z = 0.707;
-  double orientation_w = 0.707;
+  double orientation_z = 0.997495;
+  double orientation_w = 0.0707372;
 
   // 地图"/robot1/map"到地图"/robot2/map"的平移向量和旋转向量（旋转向量用四元数表示）
-  double translation_x = -0.33;  // 平移矩阵(translation_x, translation_y, translation_z)
-  double translation_y = 2.41;
+  double translation_x = -4.93361;  // 平移矩阵(translation_x, translation_y, translation_z)
+  double translation_y = 5.53478;
   double translation_z = 0.0;
   double quaternion_x = 0.0;     // 四元数(quaternion_x, quaternion_y, quaternion_z, quaternion_w)
   double quaternion_y = 0.0;
-  double quaternion_z = 0.707;
-  double quaternion_w = 0.707;
+  double quaternion_z = -0.713266;
+  double quaternion_w = 0.700893;
 
   tf::Transform transform = tf::Transform(tf::Quaternion(quaternion_x, quaternion_y, quaternion_z, quaternion_w),
                                           tf::Vector3(translation_x, translation_y, translation_z));
@@ -177,7 +177,10 @@ int main(int argc, char** argv)
   std::cout << "wormhole.getRotation().w(): " << wormhole.getRotation().w() << std::endl;
 
 
-  tf::Quaternion quaternion_test(0, 0, -0.999, 0.037);
+  tf::Quaternion quaternion_test(wormhole.getRotation().x(),
+                                 wormhole.getRotation().y(),
+                                 wormhole.getRotation().z(),
+                                 wormhole.getRotation().w());
   tf::Matrix3x3 matrix_test(quaternion_test);
   double roll_transform_test;
   double pitch_transform_test;
